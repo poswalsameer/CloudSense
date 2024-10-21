@@ -4,6 +4,50 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Cloud, CloudDrizzle, CloudRain, Droplets, Sun, Thermometer, Wind } from "lucide-react"
 import { motion } from "framer-motion"
+import WeatherCard from './AppComponents/WeatherCard';
+
+interface Weather {
+  id: number;
+  main: string;
+  description: string;
+  icon: string;
+}
+
+interface Main {
+  temp: number;
+  feels_like: number;
+  temp_min: number;
+  temp_max: number;
+  pressure: number;
+  humidity: number;
+}
+
+interface Wind {
+  speed: number;
+  deg: number;
+}
+
+interface WeatherListItem {
+  dt: number;
+  main: Main;
+  weather: Weather[];
+  wind: Wind;
+  dt_txt: string;
+}
+
+interface City {
+  id: number;
+  name: string;
+  country: string;
+}
+
+interface ForecastResponse {
+  cod: string;
+  message: number;
+  cnt: number;
+  list: WeatherListItem[]; 
+  city: City;
+}
 
 // Mock weather data for 6 cities
 const weatherData = [
@@ -80,49 +124,37 @@ const weatherData = [
 
 // { city, temperature, minTemp, maxTemp, condition, humidity, windSpeed }
 
-const WeatherCard = () => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-  >
-    <Card className="w-full max-w-sm bg-white bg-opacity-80 backdrop-blur-md">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Delhi</h2>
-            <p className="text-4xl font-bold text-gray-900">40°C</p>
-          </div>
-          {/* <WeatherIcon condition={condition} /> */}
-        </div>
-        <div className="flex justify-between text-sm text-gray-600 mb-4">
-          <div>
-            <Thermometer className="inline mr-1" size={16} />
-            20°C / 45°C
-          </div>
-          <div>Sunny</div>
-        </div>
-        <div className="flex justify-between text-sm text-gray-600">
-          <div>
-            <Droplets className="inline mr-1" size={16} />
-            Humidity: 40%
-          </div>
-          <div>
-            <Wind className="inline mr-1" size={16} />
-            Wind: 13 km/h
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  </motion.div>
-)
 
 export default function WeatherApp() {
-  const [time, setTime] = useState(new Date())
+
+  const [time, setTime] = useState<Date>(new Date())
+  const [cityData, setCityData] = useState<ForecastResponse[]>([]);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000)
     return () => clearInterval(timer)
+  }, [])
+
+  const fetchData = async ( city: string ): Promise<ForecastResponse> => {
+    const apiURL = `http://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${process.env.NEXT_PUBLIC_API_KEY}`;
+    const response = await fetch(apiURL);
+    const data: ForecastResponse = await response.json();
+    return data;
+  }
+
+  useEffect( () => {
+    const cities = ["Delhi", "Mumbai", "Chennai", "Bangalore", "Kolkata", "Hyderabad"];
+    const fetchAllCitiesData = async () => {
+      const allCitiesData: ForecastResponse[] = await Promise.all(
+        cities.map(city => fetchData(city)) 
+      );
+
+      setCityData(allCitiesData);
+      console.log(allCitiesData); //allCitiesData[0].list will give the 40 sized array
+    };
+
+    fetchAllCitiesData();
+
   }, [])
 
   const hours = time.getHours()
@@ -134,15 +166,27 @@ export default function WeatherApp() {
         ? "bg-gradient-to-b from-blue-300 via-blue-200 to-blue-100" 
         : "bg-gradient-to-b from-indigo-900 via-purple-900 to-pink-800"
     }`}>
+
       <h1 className="text-4xl font-bold mb-8 text-center text-white drop-shadow-lg">
         Weather Updates
       </h1>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-        {weatherData.map((city, index) => (
+
+        {cityData.map((city, index) => (
           <div key={index} className={`transform ${index % 2 === 0 ? "md:translate-y-4" : ""}`}>
-            <WeatherCard />
+            <WeatherCard  
+              city={city.city.name}
+              temp={city.list[0].main.temp}
+              minTemp={city.list[0].main.temp_min}
+              maxTemp={city.list[0].main.temp_max}
+              mainWeather={city.list[0].weather[0].main}
+              humidity={city.list[0].main.humidity}
+              windSpeed={city.list[0].wind.speed}
+            />
           </div>
         ))}
+        
       </div>
     </div>
   )
