@@ -142,20 +142,43 @@ export default function WeatherApp() {
     return data;
   }
 
-  useEffect( () => {
+  useEffect(() => {
     const cities = ["Delhi", "Mumbai", "Chennai", "Bangalore", "Kolkata", "Hyderabad"];
+
     const fetchAllCitiesData = async () => {
       const allCitiesData: ForecastResponse[] = await Promise.all(
-        cities.map(city => fetchData(city)) 
+        cities.map(city => fetchData(city))
       );
-
       setCityData(allCitiesData);
-      console.log(allCitiesData); //allCitiesData[0].list will give the 40 sized array
+      console.log(allCitiesData); // allCitiesData[0].list will give the 40 sized array
     };
 
+    // Fetch data on component mount
     fetchAllCitiesData();
 
-  }, [])
+    // Set up an interval to fetch data every 5 minutes (300,000 ms)
+    const intervalId = setInterval(() => {
+      fetchAllCitiesData();
+    }, 300000); // 300000 ms = 5 minutes
+
+    // Clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // useEffect( () => {
+  //   const cities = ["Delhi", "Mumbai", "Chennai", "Bangalore", "Kolkata", "Hyderabad"];
+  //   const fetchAllCitiesData = async () => {
+  //     const allCitiesData: ForecastResponse[] = await Promise.all(
+  //       cities.map(city => fetchData(city)) 
+  //     );
+
+  //     setCityData(allCitiesData);
+  //     console.log(allCitiesData); //allCitiesData[0].list will give the 40 sized array
+  //   };
+
+  //   fetchAllCitiesData();
+
+  // }, [])
 
   const hours = time.getHours()
   const isDaytime = hours > 6 && hours < 20
@@ -171,13 +194,15 @@ export default function WeatherApp() {
         Weather Updates
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+      <div className="grid grid-cols-3 justify-items-center place-content-center gap-y-10">
 
         {cityData.map((city, index) => (
-          <div key={index} className={`transform ${index % 2 === 0 ? "md:translate-y-4" : ""}`}>
+          <div key={index} >
             <WeatherCard  
               city={city.city.name}
               temp={city.list[0].main.temp}
+              feelsLike={city.list[0].main.feels_like}
+              dt={city.list[0].dt}
               minTemp={city.list[0].main.temp_min}
               maxTemp={city.list[0].main.temp_max}
               mainWeather={city.list[0].weather[0].main}
