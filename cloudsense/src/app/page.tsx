@@ -184,17 +184,25 @@ export default function WeatherApp() {
   const isDaytime = hours > 6 && hours < 20
 
   return (
-    <div className={`min-h-screen p-8 ${
-      isDaytime 
-        ? "bg-gradient-to-b from-blue-300 via-blue-200 to-blue-100" 
-        : "bg-gradient-to-b from-indigo-900 via-purple-900 to-pink-800"
-    }`}>
+    <div className="min-h-screen p-8 bg-gradient-to-b from-indigo-900 via-blue-900 to-blue-950">
 
-      <h1 className="text-4xl font-bold mb-8 text-center text-white drop-shadow-lg">
+      <h1 className="
+      text-4xl font-bold my-8 text-center text-white drop-shadow-lg
+      sm:text-4xl sm:font-bold sm:my-8 sm:text-center sm:text-white sm:drop-shadow-lg
+      md:text-4xl md:font-bold md:my-8 md:text-center md:text-white md:drop-shadow-lg
+      lg:text-4xl lg:font-bold lg:my-8 lg:text-center lg:text-white lg:drop-shadow-lg
+      xl:text-4xl xl:font-bold xl:my-8 xl:text-center xl:text-white xl:drop-shadow-lg
+      2xl:text-4xl 2xl:font-bold 2xl:my-8 2xl:text-center 2xl:text-white 2xl:drop-shadow-lg">
         Weather Updates
       </h1>
 
-      <div className="grid grid-cols-3 justify-items-center place-content-center gap-y-10">
+      <div className="
+      grid grid-cols-1 justify-items-center place-content-center gap-y-6
+      sm:grid sm:grid-cols-1 sm:justify-items-center sm:place-content-center sm:gap-y-10
+      md:grid md:grid-cols-2 md:justify-items-center md:place-content-center md:gap-y-10
+      lg:grid lg:grid-cols-2 lg:justify-items-center lg:place-content-center lg:gap-y-10
+      xl:grid xl:grid-cols-3 xl:justify-items-center xl:place-content-center xl:gap-y-10
+      2xl:grid 2xl:grid-cols-3 2xl:justify-items-center 2xl:place-content-center 2xl:gap-y-10">
 
         {cityData.map((city, index) => (
           <div key={index} >
